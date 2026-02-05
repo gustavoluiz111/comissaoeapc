@@ -35,6 +35,7 @@ const State = {
     },
 
     async load() {
+        this.data = { holidays: {}, overrides: {}, lastUpdated: null }; // Reset to avoid stale merge issues
         if (this.useFirebase) {
             try {
                 const doc = await this.db.collection('config').doc('schedule').get();
@@ -46,7 +47,6 @@ const State = {
                 }
             } catch (e) {
                 console.error("Error loading from Firebase:", e);
-                // Fallback to local on error? Maybe not to avoid sync issues.
             }
         } else {
             const stored = localStorage.getItem(this.key);
@@ -103,10 +103,16 @@ const State = {
  * Distributes groups across days.
  */
 const Scheduler = {
-    // 11 Groups * 2 days/week = 22 slots per week.
-    // Week distribution pattern: [5, 5, 4, 4, 4] = 22 slots.
-    // Cycle: Mon(5), Tue(5), Wed(4), Thu(4), Fri(4).
-    slotsPerWeekDay: [5, 5, 4, 4, 4], // Index 0 = Mon, 4 = Fri
+    // New Configuration: 1 Group per Day, 2 Consecutive Days.
+    // Cycle: G1, G1, G2, G2, ..., G11, G11 -> Repeat.
+
+    // Helper for safe local dates YYYY-MM-DD
+    formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    },
 
     async generateCalendar(year, groups) {
         await State.init(); // Ensure data is loaded
@@ -114,24 +120,15 @@ const Scheduler = {
         const startDate = new Date(year, 0, 1); // Jan 1st
         const endDate = new Date(year, 11, 31); // Dec 31st
 
-        // Create a queue of groups where each appears 2 times
-        // To ensure fair distribution, we interleave them or just double the array?
-        // Let's create a robust queue: [G1...G11, G1...G11] shuffled or sorted?
-        // Sorted ensures G1 is Mon/Wed, G2 Mon/Thu etc. consistently.
-        // Let's keep it sorted for predictability, or simple rotation.
         let queue = [];
 
-        // Helper to refill queue
         const refillQueue = () => {
-            // Create 2 instances of each group
+            // Fill queue with 2 instances of each group in order
             let batch = [];
             groups.forEach(g => {
                 batch.push(g);
-                batch.push(g);
+                batch.push(g); // 2 consecutive days
             });
-            // We return them in order. 
-            // To prevent the same group appearing on the same day if possible, 
-            // we might need a smarter distribution if the daily capacity > total groups (not the case here, 5 < 11).
             return batch;
         };
 
@@ -149,33 +146,28 @@ const Scheduler = {
                 const status = State.getDayStatus(dateStr);
 
                 if (status.type === 'AULA_NORMAL') {
-                    // It's a school day. Determine how many slots needed.
-                    // Mon(1)..Fri(5) -> Array index 0..4
-                    const slotsNeeded = this.slotsPerWeekDay[dayOfWeek - 1];
-
-                    const daysGroups = [];
-
-                    for (let i = 0; i < slotsNeeded; i++) {
-                        if (queue.length === 0) {
-                            queue = refillQueue();
-                        }
-                        daysGroups.push(queue.shift());
+                    // Assign ONE group from queue
+                    if (queue.length === 0) {
+                        queue = refillQueue();
                     }
+
+                    const group = queue.shift();
 
                     schedule[dateStr] = {
                         type: 'AULA_NORMAL',
-                        groups: daysGroups
+                        groups: [group]
                     };
                 } else {
                     // Holiday / No Class
+                    // Queue is NOT consumed. Flow pauses.
                     schedule[dateStr] = {
                         type: status.type,
                         description: status.description,
                         groups: []
                     };
-                    // Note: We do NOT consume the queue, so groups are pushed to the next valid day.
-                    // This satisfies: "Reorganizar automaticamente a escala da semana."
                 }
+            } else {
+                // Weekends - do nothing particular, just existing logic is fine.
             }
 
             // Next day
