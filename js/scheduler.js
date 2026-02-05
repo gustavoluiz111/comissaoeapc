@@ -1,46 +1,102 @@
 /**
  * State Management
  * Handles persistence of holidays and schedule overrides.
+ * Supports: LocalStorage (Default) and Firebase Firestore (if configured).
  */
 const State = {
     key: 'comissao_schedule_state_v1',
+    useFirebase: false,
+    db: null,
     data: {
-        holidays: {}, // Format: "YYYY-MM-DD": { type: "FERIADO" | "SEM_AULA" | "EVENTO", description: "..." }
-        overrides: {}, // Format: "YYYY-MM-DD": ["3A-G1", "3B-G2"] (Array of Group IDs)
+        holidays: {},
+        overrides: {},
         lastUpdated: null
     },
 
-    load() {
-        const stored = localStorage.getItem(this.key);
-        if (stored) {
-            this.data = JSON.parse(stored);
+    async init() {
+        // Check if Firebase is available and configured
+        if (typeof firebase !== 'undefined' && window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey !== "SUA_API_KEY_AQUI") {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(window.FIREBASE_CONFIG);
+                }
+                this.db = firebase.firestore();
+                this.useFirebase = true;
+                console.log("State: Using Firebase Firestore");
+            } catch (e) {
+                console.error("Firebase Init Error:", e);
+                this.useFirebase = false;
+            }
+        } else {
+            console.log("State: Using LocalStorage (Firebase keys not found)");
+        }
+
+        await this.load();
+    },
+
+    async load() {
+        if (this.useFirebase) {
+            try {
+                const doc = await this.db.collection('config').doc('schedule').get();
+                if (doc.exists) {
+                    this.data = doc.data();
+                } else {
+                    // Initialize if empty
+                    await this.save();
+                }
+            } catch (e) {
+                console.error("Error loading from Firebase:", e);
+                // Fallback to local on error? Maybe not to avoid sync issues.
+            }
+        } else {
+            const stored = localStorage.getItem(this.key);
+            if (stored) {
+                this.data = JSON.parse(stored);
+            }
         }
         return this.data;
     },
 
-    save() {
+    async save() {
         this.data.lastUpdated = new Date().toISOString();
-        localStorage.setItem(this.key, JSON.stringify(this.data));
+
+        if (this.useFirebase) {
+            try {
+                await this.db.collection('config').doc('schedule').set(this.data);
+            } catch (e) {
+                console.error("Error saving to Firebase:", e);
+                alert("Erro ao salvar no servidor. Verifique sua conexão.");
+            }
+        } else {
+            localStorage.setItem(this.key, JSON.stringify(this.data));
+        }
     },
 
-    setDayStatus(dateStr, type, description = "") {
+    async setDayStatus(dateStr, type, description = "") {
         if (type === 'AULA_NORMAL') {
-            delete this.data.holidays[dateStr];
+            if (this.data.holidays && this.data.holidays[dateStr]) {
+                delete this.data.holidays[dateStr];
+            }
         } else {
+            this.data.holidays = this.data.holidays || {};
             this.data.holidays[dateStr] = { type, description };
         }
-        this.save();
+        await this.save();
     },
 
     getDayStatus(dateStr) {
-        return this.data.holidays[dateStr] || { type: 'AULA_NORMAL', description: '' };
+        return (this.data.holidays && this.data.holidays[dateStr]) || { type: 'AULA_NORMAL', description: '' };
     },
 
     reset() {
-        localStorage.removeItem(this.key);
-        this.data = { holidays: {}, overrides: {} };
+        if (confirm("Resetar locais e remotos?")) {
+            localStorage.removeItem(this.key);
+            this.data = { holidays: {}, overrides: {} };
+            if (this.useFirebase) this.save();
+        }
     }
 };
+
 
 /**
  * Scheduler Logic
@@ -52,8 +108,8 @@ const Scheduler = {
     // Cycle: Mon(5), Tue(5), Wed(4), Thu(4), Fri(4).
     slotsPerWeekDay: [5, 5, 4, 4, 4], // Index 0 = Mon, 4 = Fri
 
-    generateCalendar(year, groups) {
-        State.load();
+    async generateCalendar(year, groups) {
+        await State.init(); // Ensure data is loaded
         const schedule = {};
         const startDate = new Date(year, 0, 1); // Jan 1st
         const endDate = new Date(year, 11, 31); // Dec 31st

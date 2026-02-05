@@ -200,6 +200,11 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script src="js/firebase-config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/scheduler.js"></script>
     <script>
@@ -207,6 +212,8 @@
         const loginSection = document.getElementById('loginSection');
         const adminPanel = document.getElementById('adminPanel');
         const loginForm = document.getElementById('loginForm');
+
+        // Wait for State init before checking anything (simulated by just ensuring scripts load)
 
         // Check session
         if (sessionStorage.getItem('admin_logged_in') === 'true') {
@@ -227,9 +234,10 @@
             }
         };
 
-        function showAdmin() {
+        async function showAdmin() {
             loginSection.style.display = 'none';
             adminPanel.style.display = 'block';
+            await State.init(); // Initialize DB connection
             initAdminCalendar();
         }
 
@@ -316,13 +324,13 @@
             editModal.style.display = 'none';
         }
 
-        document.getElementById('editForm').onsubmit = (e) => {
+        document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
             const date = document.getElementById('editDateValue').value;
             const type = document.getElementById('editStatus').value;
             const desc = document.getElementById('editDescription').value;
 
-            State.setDayStatus(date, type, desc);
+            await State.setDayStatus(date, type, desc);
             closeEditModal();
             renderAdminCalendar(currentMonth, currentYear);
             alert('Calendário atualizado! A escala será recalculada automaticamente.');

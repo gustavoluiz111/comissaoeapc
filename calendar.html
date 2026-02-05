@@ -171,6 +171,11 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script src="js/firebase-config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/scheduler.js"></script>
     <script>
@@ -188,9 +193,9 @@
 
         let scheduleCache = {};
 
-        function init() {
+        async function init() {
             // Generate full year schedule once (or whenever state changes)
-            scheduleCache = Scheduler.generateCalendar(currentYear, ALL_GROUPS);
+            scheduleCache = await Scheduler.generateCalendar(currentYear, ALL_GROUPS);
             renderCalendar(currentMonth, currentYear);
 
             document.getElementById('prevMonth').onclick = () => changeMonth(-1);
@@ -199,16 +204,16 @@
             window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; }
         }
 
-        function changeMonth(delta) {
+        async function changeMonth(delta) {
             currentMonth += delta;
             if (currentMonth > 11) {
                 currentMonth = 0;
                 currentYear++;
-                scheduleCache = Scheduler.generateCalendar(currentYear, ALL_GROUPS);
+                scheduleCache = await Scheduler.generateCalendar(currentYear, ALL_GROUPS);
             } else if (currentMonth < 0) {
                 currentMonth = 11;
                 currentYear--;
-                scheduleCache = Scheduler.generateCalendar(currentYear, ALL_GROUPS);
+                scheduleCache = await Scheduler.generateCalendar(currentYear, ALL_GROUPS);
             }
             renderCalendar(currentMonth, currentYear);
         }
