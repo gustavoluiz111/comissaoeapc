@@ -56,6 +56,27 @@
             </div>
         </section>
 
+        <!-- Weekly Summary Section -->
+        <section class="section container animate-up" style="animation-delay: 0.3s;">
+            <div class="glass-panel" style="position: relative;">
+                <h2 style="display: flex; align-items: center; gap: 10px;">
+                    📅 Escala da Semana
+                    <span
+                        style="font-size: 0.6em; background: var(--primary-blue-light); color: white; padding: 2px 8px; border-radius: 10px; vertical-align: middle;">Atual</span>
+                </h2>
+                <div id="weekly-summary-container"
+                    style="margin-top: 20px; font-family: monospace; white-space: pre-wrap; background: rgba(255,255,255,0.5); padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+                    Carregando escala...</div>
+
+                <button id="copy-btn" class="btn btn-primary" style="margin-top: 15px;">
+                    📋 Copiar para Avisos
+                </button>
+                <p id="copy-msg"
+                    style="display:inline-block; margin-left: 10px; color: green; opacity: 0; transition: opacity 0.5s;">
+                    Copiado!</p>
+            </div>
+        </section>
+
         <!-- Info Section -->
         <section class="section container">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
@@ -97,6 +118,42 @@
     <!-- App Scripts -->
     <script src="js/firebase-config.js"></script>
     <script src="js/data.js"></script> <!-- Included for consistency, though index doesn't strictly need it yet -->
+    <script>
+        async function loadWeeklySummary() {
+            const container = document.getElementById('weekly-summary-container');
+            const weekData = await Scheduler.getWeekSchedule(new Date());
+
+            let text = `📢 *ESCALA DA SEMANA* 📢\n\n`;
+
+            weekData.forEach(day => {
+                text += `🗓️ ${day.dayName} (${day.dateStr}): `;
+
+                if (day.data.type === 'AULA_NORMAL') {
+                    // Combine groups
+                    const groups = day.data.groups.map(g => `${g.turma} G${g.number}`).join(' & ');
+                    text += `*${groups}*\n`;
+                } else {
+                    text += `🚫 *${day.data.description || 'Sem Vendas'}*\n`;
+                }
+            });
+
+            text += `\nBom trabalho a todos! 💪`;
+
+            container.innerText = text;
+
+            // Copy Logic
+            document.getElementById('copy-btn').onclick = () => {
+                navigator.clipboard.writeText(text).then(() => {
+                    const msg = document.getElementById('copy-msg');
+                    msg.style.opacity = '1';
+                    setTimeout(() => msg.style.opacity = '0', 2000);
+                });
+            };
+        }
+
+        // Wait for DOM
+        document.addEventListener('DOMContentLoaded', loadWeeklySummary);
+    </script>
 </body>
 
 </html>

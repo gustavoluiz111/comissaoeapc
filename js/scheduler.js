@@ -182,5 +182,41 @@ const Scheduler = {
         }
 
         return schedule;
+    },
+
+    /**
+     * Returns the schedule for the week containing the given date.
+     * Returns array of { date: Date, dateStr: string, dayName: string, events: [] }
+     */
+    async getWeekSchedule(inputDate = new Date()) {
+        await State.init();
+        const year = inputDate.getFullYear();
+        // Generate whole year (cached ideally, but fast enough)
+        const fullSchedule = await this.generateCalendar(year, ALL_GROUPS);
+
+        // Find Monday of the current week
+        const day = inputDate.getDay(); // 0 (Sun) - 6 (Sat)
+        const diff = inputDate.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+        const monday = new Date(inputDate.setDate(diff));
+
+        const weekData = [];
+        const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+
+        for (let i = 0; i < 5; i++) {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            const dateStr = d.toISOString().split('T')[0];
+            const ptDate = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); // DD/MM
+
+            if (fullSchedule[dateStr]) {
+                weekData.push({
+                    dayName: days[i],
+                    dateStr: ptDate,
+                    fullDate: dateStr,
+                    data: fullSchedule[dateStr]
+                });
+            }
+        }
+        return weekData;
     }
 };
