@@ -140,7 +140,8 @@ const Scheduler = {
         let currentDate = new Date(startDate);
 
         while (currentDate <= endDate) {
-            const dateStr = currentDate.toISOString().split('T')[0];
+            // Safe Date String using local components
+            const dateStr = this.formatDate(currentDate);
             const dayOfWeek = currentDate.getDay(); // 0=Sun, 6=Sat
 
             // Check if it's a school day (Mon-Fri)
