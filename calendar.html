@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário - Comissão 3º Ano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 4px;
+        }
+
+        .day-cell {
+            background: white;
+            min-height: 120px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            position: relative;
+        }
+
+        .day-cell.other-month {
+            background: #f9f9f9;
+            color: #ccc;
+        }
+
+        .day-cell.today {
+            border: 2px solid var(--secondary-red);
+        }
+
+        .date-number {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .event-tag {
+            display: block;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            color: white;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tag-school {
+            background-color: var(--primary-blue-light);
+        }
+
+        .tag-holiday {
+            background-color: var(--secondary-red);
+            text-align: center;
+        }
+
+        .tag-noclass {
+            background-color: #757575;
+            text-align: center;
+        }
+
+        .tag-event {
+            background-color: #ff9800;
+            text-align: center;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="logo animate-up">
+                <img src="img/logo.png" alt="Logo Comissão">
+            </a>
+            <nav class="nav-links animate-up">
+                <a href="index.html">Início</a>
+                <a href="calendar.html" class="active">Calendário</a>
+                <a href="groups.html">Grupos</a>
+                <a href="admin.html" class="btn btn-primary"
+                    style="color: white; padding: 8px 20px; font-size: 0.8rem;">Área ADM</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container section">
+        <div class="calendar-controls">
+            <button class="btn btn-outline" id="prevMonth">&lt; Anterior</button>
+            <h2 id="currentMonthYear" style="margin:0;">Janeiro 2026</h2>
+            <button class="btn btn-outline" id="nextMonth">Próximo &gt;</button>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Headers -->
+            <div class="day-header">Dom</div>
+            <div class="day-header">Seg</div>
+            <div class="day-header">Ter</div>
+            <div class="day-header">Qua</div>
+            <div class="day-header">Qui</div>
+            <div class="day-header">Sex</div>
+            <div class="day-header">Sáb</div>
+
+            <!-- Days will be generated here -->
+        </div>
+    </main>
+
+    <!-- Modal for details -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3 id="modalTitle">Detalhes</h3>
+            <div id="modalBody">
+                <!-- Details injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/scheduler.js"></script>
+    <script>
+        // Calendar Controller
+        const grid = document.getElementById('calendarGrid');
+        const monthLabel = document.getElementById('currentMonthYear');
+        const modal = document.getElementById('detailsModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const closeBtn = document.querySelector('.close-btn');
+
+        let currentDate = new Date(); // Start with today
+        let currentMonth = currentDate.getMonth(); // 0-11
+        let currentYear = currentDate.getFullYear();
+
+        let scheduleCache = {};
+
+        function init() {
+            // Generate full year schedule once (or whenever state changes)
+            scheduleCache = Scheduler.generateCalendar(currentYear, ALL_GROUPS);
+            renderCalendar(currentMonth, currentYear);
+
+            document.getElementById('prevMonth').onclick = () => changeMonth(-1);
+            document.getElementById('nextMonth').onclick = () => changeMonth(1);
+            closeBtn.onclick = () => modal.style.display = "none";
+            window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; }
+        }
+
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+                scheduleCache = Scheduler.generateCalendar(currentYear, ALL_GROUPS);
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+                scheduleCache = Scheduler.generateCalendar(currentYear, ALL_GROUPS);
+            }
+            renderCalendar(currentMonth, currentYear);
+        }
+
+        function renderCalendar(month, year) {
+            // Update Header
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            monthLabel.textContent = `${monthNames[month]} ${year}`;
+
+            // Clear days (keep headers)
+            // Remove all div elements after the first 7
+            while (grid.children.length > 7) {
+                grid.removeChild(grid.lastChild);
+            }
+
+            const firstDay = new Date(year, month, 1).getDay(); // 0-6
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Padding / Previous Month
+            for (let i = 0; i < firstDay; i++) {
+                const d = document.createElement('div');
+                d.className = 'day-cell other-month';
+                grid.appendChild(d);
+            }
+
+            // Days
+            for (let d = 1; d <= daysInMonth; d++) {
+                const cell = document.createElement('div');
+                cell.className = 'day-cell';
+
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const todayStr = new Date().toISOString().split('T')[0];
+                if (dateStr === todayStr) cell.classList.add('today');
+
+                cell.innerHTML = `<span class="date-number">${d}</span>`;
+
+                // Add Groups info
+                if (scheduleCache[dateStr]) {
+                    const info = scheduleCache[dateStr];
+                    if (info.type === 'AULA_NORMAL') {
+                        info.groups.forEach(g => {
+                            const tag = document.createElement('span');
+                            tag.className = 'event-tag tag-school';
+                            tag.textContent = `${g.turma} - Grupo ${g.number}`;
+                            tag.style.fontSize = '0.75rem';
+                            tag.style.padding = '4px';
+                            tag.style.whiteSpace = 'normal';
+                            tag.style.lineHeight = '1.2';
+                            tag.style.textAlign = 'center';
+                            tag.onclick = (e) => {
+                                e.stopPropagation();
+                                showGroupDetails(g, dateStr);
+                            };
+                            cell.appendChild(tag);
+                        });
+                    } else {
+                        const tag = document.createElement('span');
+                        tag.className = 'event-tag ' + (info.type === 'FERIADO' ? 'tag-holiday' : info.type === 'EVENTO' ? 'tag-event' : 'tag-noclass');
+                        tag.textContent = info.description || info.type.replace('_', ' ');
+                        cell.appendChild(tag);
+                    }
+                }
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function showGroupDetails(group, date) {
+            modalTitle.textContent = `Vendas - ${date.split('-').reverse().join('/')}`;
+            modalBody.innerHTML = `
+                <div style="background:var(--gray-bg); padding:15px; border-radius:5px;">
+                    <h4 style="color:var(--primary-blue)">${group.turma} - Grupo ${group.number}</h4>
+                    <p><strong>Representante:</strong> ${group.representative}</p>
+                    <p><strong>Integrantes:</strong></p>
+                    <ul>
+                        ${group.members.map(m => `<li>${m}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            modal.style.display = "block";
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
