@@ -129,12 +129,14 @@
             weekData.forEach(day => {
                 text += `🗓️ ${day.dayName} (${day.dateStr}): `;
 
-                if (day.data.type === 'AULA_NORMAL') {
+                if (day.data && day.data.type === 'AULA_NORMAL') {
                     // Combine groups
                     const groups = day.data.groups.map(g => `${g.turma} G${g.number}`).join(' & ');
                     text += `*${groups}*\n`;
-                } else {
+                } else if (day.data) {
                     text += `🚫 *${day.data.description || 'Sem Vendas'}*\n`;
+                } else {
+                    text += `⚠️ *Dados não computados*\n`;
                 }
             });
 

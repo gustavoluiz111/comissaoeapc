@@ -284,7 +284,11 @@
             for (let d = 1; d <= daysInMonth; d++) {
                 const cell = document.createElement('div');
                 cell.className = 'admin-day';
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+                // Safe formatting
+                const mm = String(month + 1).padStart(2, '0');
+                const dd = String(d).padStart(2, '0');
+                const dateStr = `${year}-${mm}-${dd}`;
 
                 // Get Status
                 const status = State.getDayStatus(dateStr);

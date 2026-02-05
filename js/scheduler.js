@@ -191,13 +191,13 @@ const Scheduler = {
     async getWeekSchedule(inputDate = new Date()) {
         await State.init();
         const year = inputDate.getFullYear();
-        // Generate whole year (cached ideally, but fast enough)
         const fullSchedule = await this.generateCalendar(year, ALL_GROUPS);
 
-        // Find Monday of the current week
-        const day = inputDate.getDay(); // 0 (Sun) - 6 (Sat)
-        const diff = inputDate.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-        const monday = new Date(inputDate.setDate(diff));
+        // Find Monday of the current week (Sunday is 0)
+        const day = inputDate.getDay();
+        const diff = inputDate.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(inputDate);
+        monday.setDate(diff);
 
         const weekData = [];
         const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
@@ -205,7 +205,7 @@ const Scheduler = {
         for (let i = 0; i < 5; i++) {
             const d = new Date(monday);
             d.setDate(monday.getDate() + i);
-            const dateStr = d.toISOString().split('T')[0];
+            const dateStr = this.formatDate(d);
             const ptDate = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); // DD/MM
 
             if (fullSchedule[dateStr]) {
