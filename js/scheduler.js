@@ -21,14 +21,27 @@ const State = {
                     firebase.initializeApp(window.FIREBASE_CONFIG);
                 }
                 this.db = firebase.firestore();
+                // Enable offline persistence if possible
+                try {
+                    await this.db.enablePersistence();
+                } catch (err) {
+                    if (err.code == 'failed-precondition') {
+                        console.warn('Persistence failed: Multiple tabs open');
+                    } else if (err.code == 'unimplemented') {
+                        console.warn('Persistence not supported by browser');
+                    }
+                }
+
                 this.useFirebase = true;
-                console.log("State: Using Firebase Firestore");
+                console.log("State: Connected to Firebase Firestore", this.data);
             } catch (e) {
                 console.error("Firebase Init Error:", e);
                 this.useFirebase = false;
+                alert("Erro ao conectar com Firebase. O sistema funcionará Offline.");
             }
         } else {
-            console.log("State: Using LocalStorage (Firebase keys not found)");
+            console.log("State: Using LocalStorage (Firebase keys not found or library missing)");
+            if (typeof firebase === 'undefined') console.error("Firebase library not loaded inside scheduler.js");
         }
 
         await this.load();
