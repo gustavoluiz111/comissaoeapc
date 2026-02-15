@@ -3,6 +3,14 @@
  * Handles persistence of holidays and schedule overrides.
  * Supports: LocalStorage (Default) and Firebase Firestore (if configured).
  */
+const HARDCODED_HOLIDAYS = {
+    "2026-02-12": { type: "SEM_AULA", description: "Carnaval Chuvoso" },
+    "2026-02-13": { type: "FERIADO", description: "Feriado" },
+    "2026-02-16": { type: "FERIADO", description: "Feriado" },
+    "2026-02-17": { type: "FERIADO", description: "Feriado" },
+    "2026-02-18": { type: "FERIADO", description: "Feriado" }
+};
+
 const State = {
     key: 'comissao_schedule_state_v1',
     useFirebase: false,
@@ -96,15 +104,6 @@ const State = {
         }
         await this.save();
     },
-
-    // Hardcoded holidays to ensure they appear regardless of DB connection
-    const HARDCODED_HOLIDAYS = {
-        "2026-02-12": { type: "SEM_AULA", description: "Carnaval Chuvoso" },
-        "2026-02-13": { type: "FERIADO", description: "Feriado" },
-        "2026-02-16": { type: "FERIADO", description: "Feriado" },
-        "2026-02-17": { type: "FERIADO", description: "Feriado" },
-        "2026-02-18": { type: "FERIADO", description: "Feriado" }
-    };
 
     getDayStatus(dateStr) {
         // Priority: Hardcoded > Database/Local > Normal
