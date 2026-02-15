@@ -78,7 +78,7 @@ const State = {
                 await this.db.collection('config').doc('schedule').set(this.data);
             } catch (e) {
                 console.error("Error saving to Firebase:", e);
-                alert("Erro ao salvar no servidor. Verifique sua conexão.");
+                alert(`Erro ao salvar no servidor (Firebase):\n${e.code}\n${e.message}\n\nVerifique se as Regras de Segurança do Firestore não expiraram.`);
             }
         } else {
             localStorage.setItem(this.key, JSON.stringify(this.data));
@@ -97,7 +97,20 @@ const State = {
         await this.save();
     },
 
+    // Hardcoded holidays to ensure they appear regardless of DB connection
+    const HARDCODED_HOLIDAYS = {
+        "2026-02-12": { type: "SEM_AULA", description: "Carnaval Chuvoso" },
+        "2026-02-13": { type: "FERIADO", description: "Feriado" },
+        "2026-02-16": { type: "FERIADO", description: "Feriado" },
+        "2026-02-17": { type: "FERIADO", description: "Feriado" },
+        "2026-02-18": { type: "FERIADO", description: "Feriado" }
+    };
+
     getDayStatus(dateStr) {
+        // Priority: Hardcoded > Database/Local > Normal
+        if (HARDCODED_HOLIDAYS[dateStr]) {
+            return HARDCODED_HOLIDAYS[dateStr];
+        }
         return (this.data.holidays && this.data.holidays[dateStr]) || { type: 'AULA_NORMAL', description: '' };
     },
 
