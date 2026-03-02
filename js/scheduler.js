@@ -8,13 +8,15 @@ const HARDCODED_HOLIDAYS = {
     "2026-02-13": { type: "FERIADO", description: "Feriado" },
     "2026-02-16": { type: "FERIADO", description: "Feriado" },
     "2026-02-17": { type: "FERIADO", description: "Feriado" },
-    "2026-02-18": { type: "FERIADO", description: "Feriado" }
+    "2026-02-18": { type: "FERIADO", description: "Feriado" },
+    "2026-03-06": { type: "FERIADO", description: "Data Magna de Pernambuco" }
 };
 
 const State = {
     key: 'comissao_schedule_state_v1',
     useFirebase: false,
     db: null,
+    initialized: false,
     data: {
         holidays: {},
         overrides: {},
@@ -22,6 +24,9 @@ const State = {
     },
 
     async init() {
+        if (this.initialized) return;
+        this.initialized = true;
+
         // Check if Firebase is available and configured
         if (typeof firebase !== 'undefined' && window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey !== "SUA_API_KEY_AQUI") {
             try {

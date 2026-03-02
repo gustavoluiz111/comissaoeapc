@@ -62,7 +62,7 @@ const GROUPS_DATA = {
             number: 5,
             representative: "Ayala Maria do Nascimento Alencar",
             members: [
-                "Maria Safira da Silva Lima",
+                "Mariilly Safiiry da Silva Lima",
                 "Sabrina Gabrielly de Lima",
                 "Samuel Pereira Calixto",
                 "Ana Beatriz Ferreira da Silva",
@@ -78,8 +78,8 @@ const GROUPS_DATA = {
             members: [
                 "Annally Carla Santana de Lima",
                 "Humberto Vitor Costa e Silva",
-                "Lucas Araújo Ferreira",
-                "Álvaro Nascimento de Araújo Lima",
+                "João Batista do Bomfim Neto",
+                "Lavinea Macedo Leleu Ribeiro dos Santos",
                 "Maria Clara de Oliveira Santos",
                 "Viviane Beatriz Souza de Melo"
             ]
@@ -138,7 +138,12 @@ const GROUPS_DATA = {
             representative: "João Pedro de Albuquerque Santiago",
             members: [
                 "David Lucas Ferreira Cavalcanti",
-                "Karina Pereira Ferreira da Silva"
+                "Karina Pereira Ferreira da Silva",
+                "Antony Vitor Barbosa Borges",
+                "Lucas Araújo Ferreira",
+                "Álvaro Nascimento de Araújo Lima",
+                "Arthur Antonio Magalhaes",
+                "Miguel Barbosa da Silva Leão"
             ]
         },
         {
