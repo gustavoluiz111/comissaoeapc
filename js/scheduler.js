@@ -10,7 +10,12 @@ const HARDCODED_HOLIDAYS = {
     "2026-02-17": { type: "FERIADO", description: "Feriado" },
     "2026-02-18": { type: "FERIADO", description: "Feriado" },
     "2026-03-06": { type: "FERIADO", description: "Data Magna de Pernambuco" },
-    "2026-03-10": { type: "SEM_AULA", description: "Parada da escola por greve dos prof" }
+    "2026-03-10": { type: "SEM_AULA", description: "Parada da escola por greve dos prof" },
+    "2026-03-31": { type: "SEM_AULA", description: "Excursão" },
+    "2026-04-01": { type: "SEM_AULA", description: "Sem aula" },
+    "2026-04-02": { type: "SEM_AULA", description: "Sem aula" },
+    "2026-04-03": { type: "FERIADO", description: "Sexta-feira Santa" },
+    "2026-04-21": { type: "FERIADO", description: "Tiradentes" }
 };
 
 const State = {
