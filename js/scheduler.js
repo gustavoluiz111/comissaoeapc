@@ -15,7 +15,8 @@ const HARDCODED_HOLIDAYS = {
     "2026-04-01": { type: "SEM_AULA", description: "Sem aula" },
     "2026-04-02": { type: "SEM_AULA", description: "Sem aula" },
     "2026-04-03": { type: "FERIADO", description: "Sexta-feira Santa" },
-    "2026-04-21": { type: "FERIADO", description: "Tiradentes" }
+    "2026-04-21": { type: "FERIADO", description: "Tiradentes" },
+    "2026-04-23": { type: "SEM_AULA", description: "Paralisação dos professores" }
 };
 
 const State = {

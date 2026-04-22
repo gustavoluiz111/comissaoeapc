@@ -94,7 +94,6 @@ const GROUPS_DATA = {
             members: [
                 "Emanuel de Barros Barbosa",
                 "Samyra Cavalcanti do Nascimento Melo",
-                "Arthur Antonio Magalhães da Silva",
                 "Maria Eduarda Ferreira da Silva",
                 "Cynthia Gabrielle Oliveira da Cunha Lopes",
                 "Ana Karine Marcolino Alves Guimarães",
