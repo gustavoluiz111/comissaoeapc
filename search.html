@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pesquise os dias de venda de qualquer aluno ou grupo da comissão do 3º Ano.">
+    <title>Pesquisar DI - Comissão 3º Ano</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- html2canvas para exportar JPEG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* Search page layout */
+        .search-hero {
+            padding: 60px 0 32px;
+            text-align: center;
+        }
+
+        .search-bar-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            max-width: 700px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        .search-bar-inner {
+            flex: 1;
+            position: relative;
+            min-width: 220px;
+        }
+
+        .search-bar-inner .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            pointer-events: none;
+            color: var(--text-muted);
+        }
+
+        #searchInput {
+            padding-left: 46px;
+            height: 52px;
+            font-size: 1rem;
+            border-radius: 50px;
+        }
+
+        #groupFilter {
+            height: 52px;
+            border-radius: 50px;
+            padding: 0 20px;
+            min-width: 160px;
+        }
+
+        .month-select-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            max-width: 700px;
+            margin: 16px auto 0;
+            flex-wrap: wrap;
+        }
+
+        #monthFilter, #yearFilter {
+            height: 44px;
+            border-radius: 50px;
+            padding: 0 18px;
+            flex: 1;
+            min-width: 130px;
+        }
+
+        /* Results area */
+        #results-area {
+            margin-top: 40px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            opacity: 0.4;
+        }
+
+        /* Result card */
+        .result-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 24px;
+            transition: border-color 0.3s;
+        }
+
+        .result-card:hover {
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        .result-card-header {
+            padding: 20px 28px;
+            background: rgba(59, 130, 246, 0.1);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .result-card-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .result-card-body {
+            padding: 24px 28px;
+        }
+
+        /* Days grid inside result */
+        .days-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Card-style day entry */
+        .day-card {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.22);
+            border-radius: 14px;
+            padding: 14px 18px;
+            min-width: 110px;
+            text-align: center;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            cursor: default;
+        }
+
+        .day-card:hover {
+            background: rgba(59, 130, 246, 0.18);
+            border-color: rgba(59, 130, 246, 0.45);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(59,130,246,0.15);
+        }
+
+        .day-card .dc-weekday {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--primary-blue-light);
+            margin-bottom: 6px;
+        }
+
+        .day-card .dc-day-num {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .day-card .dc-date-full {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .no-days-msg {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-style: italic;
+        }
+
+        /* Export button row */
+        .export-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        /* JPEG export card (hidden render target) */
+        #export-target {
+            position: fixed;
+            left: -9999px;
+            top: 0;
+            width: 900px;
+            background: #0F1F3D;
+            padding: 48px;
+            font-family: 'Montserrat', sans-serif;
+            border-radius: 24px;
+        }
+
+        #export-target .et-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #60A5FA;
+            margin-bottom: 6px;
+        }
+
+        #export-target .et-subtitle {
+            font-size: 0.9rem;
+            color: #64748B;
+            margin-bottom: 36px;
+        }
+
+        #export-target .et-group {
+            margin-bottom: 28px;
+            padding: 20px 24px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #export-target .et-group-name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #93C5FD;
+            margin-bottom: 4px;
+        }
+
+        #export-target .et-rep {
+            font-size: 0.78rem;
+            color: #64748B;
+            margin-bottom: 14px;
+        }
+
+        #export-target .et-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        #export-target .et-pill {
+            background: rgba(59,130,246,0.18);
+            border: 1px solid rgba(59,130,246,0.3);
+            color: #93C5FD;
+            border-radius: 50px;
+            padding: 5px 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        #export-target .et-no-days {
+            color: #475569;
+            font-size: 0.82rem;
+            font-style: italic;
+        }
+
+        #export-target .et-footer {
+            margin-top: 36px;
+            font-size: 0.72rem;
+            color: #334155;
+            text-align: center;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(59,130,246,0.3);
+            border-top-color: var(--primary-blue-light);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .match-highlight {
+            background: rgba(59,130,246,0.35);
+            border-radius: 3px;
+            padding: 0 2px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="logo animate-up">
+                <img src="img/logo.png" alt="Logo Comissão">
+            </a>
+            <nav class="nav-links animate-up">
+                <a href="index.html">Início</a>
+                <a href="calendar.html">Calendário</a>
+                <a href="groups.html">Grupos</a>
+                <a href="search.html" class="active">🔍 Pesquisar DI</a>
+                <a href="admin.html" class="btn btn-primary"
+                    style="padding: 8px 20px; font-size: 0.78rem;">Área ADM</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Search Hero -->
+        <div class="search-hero animate-up">
+            <p style="font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary-blue-light); font-weight: 700; margin-bottom: 10px;">Consulta de Escala</p>
+            <h1 style="font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 16px;">Pesquisar DI</h1>
+            <p style="color: var(--text-secondary); max-width: 520px; margin: 0 auto 36px;">
+                Busque por nome de aluno ou grupo e veja todos os dias de venda no mês selecionado.
+            </p>
+
+            <!-- Search bar -->
+            <div class="search-bar-wrapper">
+                <div class="search-bar-inner">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Nome do aluno ou representante…" autocomplete="off" spellcheck="false">
+                </div>
+                <select id="groupFilter">
+                    <option value="">Todos os Grupos</option>
+                    <option value="3A">3º Ano A</option>
+                    <option value="3B">3º Ano B</option>
+                </select>
+            </div>
+
+            <!-- Month/Year picker -->
+            <div class="month-select-row">
+                <select id="monthFilter">
+                    <option value="0">Janeiro</option>
+                    <option value="1">Fevereiro</option>
+                    <option value="2">Março</option>
+                    <option value="3">Abril</option>
+                    <option value="4">Maio</option>
+                    <option value="5">Junho</option>
+                    <option value="6">Julho</option>
+                    <option value="7">Agosto</option>
+                    <option value="8">Setembro</option>
+                    <option value="9">Outubro</option>
+                    <option value="10">Novembro</option>
+                    <option value="11">Dezembro</option>
+                </select>
+                <select id="yearFilter">
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                </select>
+                <button class="btn btn-primary" id="searchBtn" style="height: 44px; padding: 0 28px; border-radius: 50px;">Buscar</button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results-area">
+            <div class="empty-state">
+                <span class="empty-icon">🔍</span>
+                <p style="font-weight: 600; margin-bottom: 6px;">Digite para pesquisar</p>
+                <p style="font-size: 0.85rem;">Pesquise por nome ou selecione o grupo e clique em Buscar.</p>
+            </div>
+        </div>
+
+        <!-- Export hidden target -->
+        <div id="export-target"></div>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/scheduler.js"></script>
+
+    <script>
+        // ── Helpers ──────────────────────────────────────────────────────
+        const MONTH_NAMES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+                             "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+        const DAY_NAMES = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function highlight(text, query) {
+            if (!query) return text;
+            const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(re, '<mark class="match-highlight">$1</mark>');
+        }
+
+        function getDayName(dateStr) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return DAY_NAMES[new Date(y, m - 1, d).getDay()];
+        }
+
+        // ── State ─────────────────────────────────────────────────────────
+        let scheduleCache = null;
+        let cacheYear = null;
+
+        async function getSchedule(year) {
+            if (scheduleCache && cacheYear === year) return scheduleCache;
+            scheduleCache = await Scheduler.generateCalendar(year, ALL_GROUPS);
+            cacheYear = year;
+            return scheduleCache;
+        }
+
+        // ── Set default month/year to today ───────────────────────────────
+        const now = new Date();
+        document.getElementById('monthFilter').value = now.getMonth();
+        document.getElementById('yearFilter').value = now.getFullYear();
+
+        // ── Core search logic ─────────────────────────────────────────────
+        async function runSearch() {
+            const query       = document.getElementById('searchInput').value.trim().toLowerCase();
+            const groupFilter = document.getElementById('groupFilter').value; // '3A', '3B', or ''
+            const month       = parseInt(document.getElementById('monthFilter').value);
+            const year        = parseInt(document.getElementById('yearFilter').value);
+            const area        = document.getElementById('results-area');
+
+            // Show loading
+            area.innerHTML = `<div class="loading-row"><div class="spinner"></div> Carregando escala…</div>`;
+
+            let schedule;
+            try {
+                schedule = await getSchedule(year);
+            } catch (e) {
+                area.innerHTML = `<div class="empty-state"><span class="empty-icon">⚠️</span><p>Erro ao carregar escala.</p></div>`;
+                console.error(e);
+                return;
+            }
+
+            // Filter groups from GROUPS_DATA
+            const sourceTurmas = groupFilter ? [groupFilter] : Object.keys(GROUPS_DATA);
+            let matchedGroups = [];
+
+            for (const turma of sourceTurmas) {
+                for (const group of GROUPS_DATA[turma]) {
+                    // Match by group representative or any member name
+                    const matchRep = group.representative.toLowerCase().includes(query);
+                    const matchMember = group.members.some(m => m.toLowerCase().includes(query));
+                    const matchGroup = (`${group.turma} G${group.number}`).toLowerCase().includes(query) ||
+                                       (`grupo ${group.number}`).toLowerCase().includes(query) ||
+                                       (`g${group.number}`).toLowerCase() === query ||
+                                       (`grupo${group.number}`).toLowerCase() === query;
+
+                    if (query === '' || matchRep || matchMember || matchGroup) {
+                        matchedGroups.push(group);
+                    }
+                }
+            }
+
+            if (matchedGroups.length === 0) {
+                area.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">😕</span>
+                        <p style="font-weight:700;">Nenhum resultado encontrado</p>
+                        <p style="font-size:0.85rem;">Tente buscar por outro nome ou grupo.</p>
+                    </div>`;
+                return;
+            }
+
+            // For each matched group, find their selling days in the month
+            const results = matchedGroups.map(group => {
+                const sellingDays = [];
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const mm = String(month + 1).padStart(2, '0');
+                    const dd = String(d).padStart(2, '0');
+                    const dateStr = `${year}-${mm}-${dd}`;
+                    const entry = schedule[dateStr];
+
+                    if (entry && entry.type === 'AULA_NORMAL') {
+                        const isThisGroup = entry.groups.some(g => g.id === group.id);
+                        if (isThisGroup) {
+                            sellingDays.push(dateStr);
+                        }
+                    }
+                }
+
+                return { group, sellingDays };
+            });
+
+            // Render results
+            const totalDays = results.reduce((a, r) => a + r.sellingDays.length, 0);
+
+            let html = `
+                <div class="export-row animate-up">
+                    <div>
+                        <h2 style="font-size:1.4rem; margin-bottom:4px;">${matchedGroups.length} ${matchedGroups.length === 1 ? 'grupo' : 'grupos'} encontrado${matchedGroups.length !== 1 ? 's' : ''}</h2>
+                        <p style="font-size:0.83rem; color: var(--text-muted);">${MONTH_NAMES[month]} ${year} • ${totalDays} dia${totalDays !== 1 ? 's' : ''} de venda</p>
+                    </div>
+                    <button class="btn btn-secondary" id="exportJpegBtn">📸 Exportar JPEG</button>
+                </div>`;
+
+            // Full weekday names in PT
+            const WEEKDAY_FULL = ["DOM","SEG","TER","QUA","QUI","SEX","SÁB"];
+
+            for (const { group, sellingDays } of results) {
+                const daysHtml = sellingDays.length > 0
+                    ? sellingDays.map(dateStr => {
+                        const [, , dd] = dateStr.split('-');
+                        const dayIdx = new Date(
+                            Number(dateStr.split('-')[0]),
+                            Number(dateStr.split('-')[1]) - 1,
+                            Number(dd)
+                        ).getDay();
+                        const weekday = WEEKDAY_FULL[dayIdx];
+                        return `<div class="day-card">
+                                    <div class="dc-weekday">${weekday}</div>
+                                    <div class="dc-day-num">${dd}</div>
+                                    <div class="dc-date-full">${dd}/${String(month + 1).padStart(2, '0')}/${year}</div>
+                                </div>`;
+                    }).join('')
+                    : `<p class="no-days-msg">Nenhum dia de venda neste mês.</p>`;
+
+                html += `
+                    <div class="result-card animate-up">
+                        <div class="result-card-header">
+                            <div>
+                                <h3>${highlight(group.turma, query)} — Grupo ${highlight(String(group.number), query)}</h3>
+                                <p style="font-size:0.82rem; color:var(--text-muted); margin:0;">Rep: <strong style="color:var(--text-secondary);">${highlight(group.representative, query)}</strong></p>
+                            </div>
+                            <div class="badge badge-blue">${sellingDays.length} dia${sellingDays.length !== 1 ? 's' : ''}</div>
+                        </div>
+                        <div class="result-card-body">
+                            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:14px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">Dias de Venda — ${MONTH_NAMES[month]} ${year}</p>
+                            <div class="days-grid">${daysHtml}</div>
+
+                            <details style="margin-top: 20px;">
+                                <summary style="cursor:pointer; color:var(--text-muted); font-size:0.83rem; font-weight:600; user-select:none;">▸ Ver integrantes (${group.members.length})</summary>
+                                <ul style="list-style:none; margin-top: 12px; display: grid; gap: 6px;">
+                                    ${group.members.map(m => `
+                                        <li style="display:flex; align-items:center; gap:10px; font-size:0.85rem; color:var(--text-secondary); padding:7px 12px; background:var(--glass-bg); border-radius:8px; border:1px solid var(--glass-border);">
+                                            <span style="color:var(--primary-blue-light); font-size:0.45rem;">●</span>
+                                            ${highlight(m, query)}
+                                        </li>`).join('')}
+                                </ul>
+                            </details>
+                        </div>
+                    </div>`;
+            }
+
+            area.innerHTML = html;
+
+            // Export button handler
+            document.getElementById('exportJpegBtn').onclick = () => exportJpeg(results, month, year, query);
+        }
+
+        // ── JPEG Export ───────────────────────────────────────────────────
+        async function exportJpeg(results, month, year, query) {
+            const btn = document.getElementById('exportJpegBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Gerando…';
+
+            const target = document.getElementById('export-target');
+
+            let groupsHtml = '';
+            for (const { group, sellingDays } of results) {
+                const pillsHtml = sellingDays.length > 0
+                    ? sellingDays.map(dateStr => {
+                        const [, mm2, dd] = dateStr.split('-');
+                        const dayIdx2 = new Date(Number(year), Number(mm2) - 1, Number(dd)).getDay();
+                        const wdFull = ["DOM","SEG","TER","QUA","QUI","SEX","SÁB"][dayIdx2];
+                        return `<div class="et-pill"><span style="font-size:0.65rem;display:block;letter-spacing:1px;">${wdFull}</span><span style="font-size:1rem;font-weight:800;">${dd}</span><span style="font-size:0.65rem;">${dd}/${mm2}</span></div>`;
+                    }).join('')
+                    : `<span class="et-no-days">Sem dias de venda neste mês</span>`;
+
+                groupsHtml += `
+                    <div class="et-group">
+                        <div class="et-group-name">${group.turma} — Grupo ${group.number}</div>
+                        <div class="et-rep">Rep: ${group.representative}</div>
+                        <div class="et-pills">${pillsHtml}</div>
+                    </div>`;
+            }
+
+            const queryLabel = query ? `Busca: "${query}" — ` : '';
+
+            target.innerHTML = `
+                <div class="et-title">🔍 Pesquisa de DI</div>
+                <div class="et-subtitle">${queryLabel}${MONTH_NAMES[month]} ${year} • Comissão 3º Ano</div>
+                ${groupsHtml}
+                <div class="et-footer">Gerado em ${new Date().toLocaleString('pt-BR')} • Comissão 3º Ano 2026</div>
+            `;
+
+            // Wait a tick for DOM to paint
+            await new Promise(r => setTimeout(r, 120));
+
+            try {
+                const canvas = await html2canvas(target, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#0F1F3D',
+                    logging: false
+                });
+
+                const link = document.createElement('a');
+                link.download = `di_${(MONTH_NAMES[month]).toLowerCase()}_${year}${query ? '_' + query.replace(/\s+/g,'_').slice(0,20) : ''}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.93);
+                link.click();
+            } catch (e) {
+                alert('Erro ao gerar imagem: ' + e.message);
+                console.error(e);
+            }
+
+            target.innerHTML = '';
+            btn.disabled = false;
+            btn.textContent = '📸 Exportar JPEG';
+        }
+
+        // ── Event listeners ───────────────────────────────────────────────
+        document.getElementById('searchBtn').addEventListener('click', runSearch);
+
+        document.getElementById('searchInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') runSearch();
+        });
+
+        // Live filter on group change (only if already searched)
+        document.getElementById('groupFilter').addEventListener('change', () => {
+            const area = document.getElementById('results-area');
+            // Only re-run if there are results already displayed
+            if (!area.querySelector('.empty-state')) runSearch();
+        });
+    </script>
+</body>
+
+</html>

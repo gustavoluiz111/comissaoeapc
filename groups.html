@@ -4,61 +4,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Grupos de vendas da Comissão 3º Ano com integrantes e representantes.">
     <title>Grupos - Comissão 3º Ano</title>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto:wght@500;700&display=swap"
-        rel="stylesheet">
-    <!-- Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .turma-section {
-            margin-bottom: 40px;
+        .turma-section { margin-bottom: 56px; }
+
+        .turma-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
-        .turma-title {
-            border-bottom: 3px solid var(--secondary-red);
-            display: inline-block;
-            padding-bottom: 5px;
-            margin-bottom: 20px;
+        .turma-label {
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .label-a {
+            background: rgba(59,130,246,0.15);
+            color: var(--primary-blue-light);
+            border: 1px solid rgba(59,130,246,0.3);
+        }
+
+        .label-b {
+            background: rgba(6,182,212,0.15);
+            color: #67E8F9;
+            border: 1px solid rgba(6,182,212,0.3);
         }
 
         .groups-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 20px;
         }
 
         .group-card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-top: 5px solid var(--primary-blue);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
 
-        .group-card h4 {
-            color: var(--primary-blue-dark);
-            margin-bottom: 10px;
+        .group-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59,130,246,0.35);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3), 0 0 20px rgba(59,130,246,0.15);
+        }
+
+        .group-card-header {
+            padding: 16px 20px;
+            background: rgba(59,130,246,0.1);
+            border-bottom: 1px solid var(--glass-border);
             display: flex;
+            align-items: center;
             justify-content: space-between;
         }
 
+        .group-number {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .group-card-body { padding: 18px 20px; }
+
         .representative {
-            font-weight: bold;
-            color: var(--secondary-red);
-            margin-bottom: 10px;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--primary-blue-light);
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+        }
+
+        .rep-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(59,130,246,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
         }
 
         .members-list {
-            padding-left: 20px;
-            font-size: 0.95rem;
-            color: #555;
+            list-style: none;
+            display: grid;
+            gap: 6px;
         }
 
         .members-list li {
-            list-style-type: disc;
-            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.83rem;
+            color: var(--text-secondary);
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .members-list li:hover {
+            background: var(--bg-hover);
+            border-color: rgba(59,130,246,0.2);
+        }
+
+        .members-list li::before {
+            content: '–';
+            color: var(--text-muted);
+            font-size: 0.7rem;
         }
     </style>
 </head>
@@ -74,56 +143,70 @@
                 <a href="index.html">Início</a>
                 <a href="calendar.html">Calendário</a>
                 <a href="groups.html" class="active">Grupos</a>
+                <a href="search.html">🔍 Pesquisar DI</a>
                 <a href="admin.html" class="btn btn-primary"
-                    style="color: white; padding: 8px 20px; font-size: 0.8rem;">Área ADM</a>
+                    style="padding: 8px 20px; font-size: 0.78rem;">Área ADM</a>
             </nav>
         </div>
     </header>
 
     <main class="container section">
-        <h1 style="text-align: center; margin-bottom: 40px;">Grupos de Vendas</h1>
-
-        <div id="groups-container">
-            <!-- Groups will be injected here by JS -->
+        <div class="animate-up" style="text-align: center; margin-bottom: 48px;">
+            <p style="font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary-blue-light); font-weight: 700; margin-bottom: 8px;">Equipes</p>
+            <h1>Grupos de Vendas</h1>
         </div>
 
+        <div id="groups-container"></div>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Comissão 3º Ano - Escola de Aplicação.</p>
+            <p>© 2026 Comissão 3º Ano — Escola de Aplicação.</p>
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="js/data.js"></script>
     <script>
         const container = document.getElementById('groups-container');
 
-        // Render Groups
+        const turmaColors = { '3A': 'label-a', '3B': 'label-b' };
+        const turmaLabels = { '3A': '3º Ano A', '3B': '3º Ano B' };
+
+        let delay = 0;
         for (const [turma, groups] of Object.entries(GROUPS_DATA)) {
             const section = document.createElement('div');
-            section.className = 'turma-section';
+            section.className = 'turma-section animate-up';
+            section.style.animationDelay = `${delay}s`;
+            delay += 0.1;
+
+            const gridHtml = groups.map((group, i) => `
+                <div class="group-card animate-up" style="animation-delay: ${delay + i * 0.06}s;">
+                    <div class="group-card-header">
+                        <span class="group-number">Grupo ${group.number}</span>
+                        <span class="turma-label ${turmaColors[turma] || 'label-a'}">${turmaLabels[turma] || turma}</span>
+                    </div>
+                    <div class="group-card-body">
+                        <div class="representative">
+                            <div class="rep-icon">⭐</div>
+                            ${group.representative}
+                        </div>
+                        <ul class="members-list">
+                            ${group.members.map(m => `<li>${m}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
 
             section.innerHTML = `
-                <h2 class="turma-title">Turma ${turma}</h2>
-                <div class="groups-grid">
-                    ${groups.map(group => `
-                        <div class="group-card">
-                            <h4>
-                                Grupo ${group.number}
-                                <span style="font-size: 0.8em; color: #777;">${group.turma}</span>
-                            </h4>
-                            <span class="representative">⭐ Rep: ${group.representative}</span>
-                            <ul class="members-list">
-                                ${group.members.map(member => `<li>${member}</li>`).join('')}
-                            </ul>
-                        </div>
-                    `).join('')}
+                <div class="turma-header">
+                    <h2 style="margin:0;">Turma ${turma}</h2>
+                    <span class="turma-label ${turmaColors[turma] || 'label-a'}">${turmaLabels[turma] || turma}</span>
                 </div>
+                <div class="groups-grid">${gridHtml}</div>
             `;
 
             container.appendChild(section);
+            delay += groups.length * 0.06;
         }
     </script>
 
