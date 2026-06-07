@@ -19,7 +19,8 @@ const HARDCODED_HOLIDAYS = {
     "2026-04-23": { type: "SEM_AULA", description: "Paralisação dos professores" },
     "2026-04-24": { type: "SEM_AULA", description: "APAC cancelou" },
     "2026-06-03": { type: "SEM_AULA", description: "Plantão Pedagógico" },
-    "2026-06-04": { type: "SEM_AULA", description: "Vendas canceladas" }
+    "2026-06-04": { type: "SEM_AULA", description: "Vendas canceladas" },
+    "2026-06-05": { type: "SEM_AULA", description: "Sem aula" }
 };
 
 const State = {
