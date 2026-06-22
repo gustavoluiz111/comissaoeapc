@@ -20,7 +20,10 @@ const HARDCODED_HOLIDAYS = {
     "2026-04-24": { type: "SEM_AULA", description: "APAC cancelou" },
     "2026-06-03": { type: "SEM_AULA", description: "Plantão Pedagógico" },
     "2026-06-04": { type: "SEM_AULA", description: "Vendas canceladas" },
-    "2026-06-05": { type: "SEM_AULA", description: "Sem aula" }
+    "2026-06-05": { type: "SEM_AULA", description: "Sem aula" },
+    "2026-06-22": { type: "SEM_AULA", description: "Recesso de São João" },
+    "2026-06-23": { type: "SEM_AULA", description: "Recesso de São João" },
+    "2026-06-24": { type: "FERIADO", description: "São João" }
 };
 
 const State = {
