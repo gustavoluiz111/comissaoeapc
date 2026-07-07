@@ -23,7 +23,20 @@ const HARDCODED_HOLIDAYS = {
     "2026-06-05": { type: "SEM_AULA", description: "Sem aula" },
     "2026-06-22": { type: "SEM_AULA", description: "Recesso de São João" },
     "2026-06-23": { type: "SEM_AULA", description: "Recesso de São João" },
-    "2026-06-24": { type: "FERIADO", description: "São João" }
+    "2026-06-24": { type: "FERIADO", description: "São João" },
+    "2026-07-07": { type: "SEM_AULA", description: "Vendas canceladas" },
+    "2026-07-09": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-10": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-13": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-14": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-15": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-16": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-17": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-20": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-21": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-22": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-23": { type: "SEM_AULA", description: "Recesso" },
+    "2026-07-24": { type: "SEM_AULA", description: "Recesso" }
 };
 
 const State = {
