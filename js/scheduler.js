@@ -37,7 +37,8 @@ const HARDCODED_HOLIDAYS = {
     "2026-07-22": { type: "SEM_AULA", description: "Recesso" },
     "2026-07-23": { type: "SEM_AULA", description: "Recesso" },
     "2026-07-24": { type: "SEM_AULA", description: "Recesso" },
-    "2026-08-12": { type: "SEM_AULA", description: "Vendas canceladas" }
+    "2026-08-12": { type: "SEM_AULA", description: "Vendas canceladas" },
+    "2026-08-13": { type: "SEM_AULA", description: "Vendas canceladas" }
 };
 
 const State = {
