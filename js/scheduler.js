@@ -203,8 +203,15 @@ const Scheduler = {
             if (dayOfWeek >= 1 && dayOfWeek <= 5) {
                 const status = State.getDayStatus(dateStr);
 
-                if (status.type === 'AULA_NORMAL') {
-                    // Assign ONE group from queue
+                if (dayOfWeek === 1) {
+                    // Segunda-feira não possui vendas
+                    schedule[dateStr] = {
+                        type: 'SEM_AULA',
+                        description: status.description || 'Sem Vendas',
+                        groups: []
+                    };
+                } else if (status.type === 'AULA_NORMAL') {
+                    // Assign ONE group from queue (Terça a Sexta)
                     if (queue.length === 0) {
                         queue = refillQueue();
                     }
