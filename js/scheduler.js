@@ -37,7 +37,8 @@ const HARDCODED_HOLIDAYS = {
     "2026-07-22": { type: "SEM_AULA", description: "Recesso" },
     "2026-07-23": { type: "SEM_AULA", description: "Recesso" },
     "2026-07-24": { type: "SEM_AULA", description: "Recesso" },
-    "2026-08-11": { type: "SEM_AULA", description: "Vendas canceladas" }
+    "2026-08-11": { type: "SEM_AULA", description: "Vendas canceladas" },
+    "2026-09-07": { type: "FERIADO", description: "Independência do Brasil (Sem Vendas)" }
 };
 
 const State = {
@@ -203,15 +204,8 @@ const Scheduler = {
             if (dayOfWeek >= 1 && dayOfWeek <= 5) {
                 const status = State.getDayStatus(dateStr);
 
-                if (dayOfWeek === 1) {
-                    // Segunda-feira não possui vendas
-                    schedule[dateStr] = {
-                        type: 'SEM_AULA',
-                        description: status.description || 'Sem Vendas',
-                        groups: []
-                    };
-                } else if (status.type === 'AULA_NORMAL') {
-                    // Assign ONE group from queue (Terça a Sexta)
+                if (status.type === 'AULA_NORMAL') {
+                    // Assign ONE group from queue
                     if (queue.length === 0) {
                         queue = refillQueue();
                     }
