@@ -38,6 +38,7 @@ const HARDCODED_HOLIDAYS = {
     "2026-07-23": { type: "SEM_AULA", description: "Recesso" },
     "2026-07-24": { type: "SEM_AULA", description: "Recesso" },
     "2026-08-11": { type: "SEM_AULA", description: "Vendas canceladas" },
+    "2026-09-04": { type: "SEM_AULA", description: "Vendas canceladas" },
     "2026-09-07": { type: "FERIADO", description: "Independência do Brasil (Sem Vendas)" }
 };
 
